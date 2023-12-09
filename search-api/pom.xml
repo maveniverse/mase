@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>eu.maveniverse.maven.mase</groupId>
     <artifactId>mase</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>search-api</artifactId>
