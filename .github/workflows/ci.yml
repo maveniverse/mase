@@ -21,7 +21,7 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ github.sha }}
-      - run: ./mvnw -s settings.xml deploy -e -B -V
+      - run: ./mvnw clean verify -e -B -V
         env:
           RESOLVER_GPG_KEY: ${{ secrets.RESOLVER_GPG_KEY }}
           RESOLVER_GPG_KEY_PASS: ${{ secrets.RESOLVER_GPG_KEY_PASS }}
