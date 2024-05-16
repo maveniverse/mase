@@ -20,6 +20,7 @@ package org.apache.maven.search.backend.remoterepository.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -152,6 +153,21 @@ public abstract class RemoteRepositorySearchBackendImplTest {
                 FieldQuery.fieldQuery(MAVEN.VERSION, "3.1.0")));
         RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
         assertNotEquals(0, searchResponse.getTotalHits());
+        System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
+        dumpPage(searchResponse);
+    }
+
+    @Test
+    public void gave() throws IOException {
+        // LIST GAVCEs
+        SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
+                FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"),
+                FieldQuery.fieldQuery(MAVEN.ARTIFACT_ID, "maven-clean-plugin"),
+                FieldQuery.fieldQuery(MAVEN.VERSION, "3.1.0"),
+                FieldQuery.fieldQuery(MAVEN.FILE_EXTENSION, "jar")));
+        RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
+        assertEquals(1, searchResponse.getTotalHits());
+        assertNotNull(searchResponse.getPage().get(0).getLastUpdated());
         System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
         dumpPage(searchResponse);
     }
