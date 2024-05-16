@@ -10,7 +10,7 @@
 
   <groupId>eu.maveniverse.maven.mase</groupId>
   <artifactId>mase</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
@@ -35,7 +35,7 @@
   <scm>
     <connection>scm:git:git@github.com:maveniverse/mase.git</connection>
     <developerConnection>scm:git:git@github.com:maveniverse/mase.git</developerConnection>
-    <tag>release-1.0.2</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/maveniverse/mase</url>
   </scm>
 
@@ -50,7 +50,7 @@
   </ciManagement>
 
   <properties>
-    <project.build.outputTimestamp>2024-05-16T17:58:16Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2024-05-16T17:58:23Z</project.build.outputTimestamp>
 
     <!--
     Build time: latest Maven and LTS Java.
