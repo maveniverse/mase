@@ -92,15 +92,19 @@ public class ApacheHttpClientTransport implements Transport {
     }
 
     public ApacheHttpClientTransport(Duration timeout) {
-        this(RequestConfig.custom()
-                .setRedirectsEnabled(false)
-                .setConnectionRequestTimeout((int) timeout.toMillis())
-                .setConnectTimeout((int) timeout.toMillis())
-                .setSocketTimeout((int) timeout.toMillis())
-                .build(), () -> null, HttpClientBuilder.create().build());
+        this(
+                RequestConfig.custom()
+                        .setRedirectsEnabled(false)
+                        .setConnectionRequestTimeout((int) timeout.toMillis())
+                        .setConnectTimeout((int) timeout.toMillis())
+                        .setSocketTimeout((int) timeout.toMillis())
+                        .build(),
+                () -> null,
+                HttpClientBuilder.create().build());
     }
 
-    public ApacheHttpClientTransport(RequestConfig requestConfig, Supplier<HttpContext> contextSupplier, CloseableHttpClient client) {
+    public ApacheHttpClientTransport(
+            RequestConfig requestConfig, Supplier<HttpContext> contextSupplier, CloseableHttpClient client) {
         this.requestConfig = requireNonNull(requestConfig);
         this.contextSupplier = requireNonNull(contextSupplier);
         this.client = requireNonNull(client);
