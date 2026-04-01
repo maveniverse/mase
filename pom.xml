@@ -27,6 +27,8 @@
 
   <modules>
     <module>search-api</module>
+    <module>search-transport-apache</module>
+    <module>search-transport-java11</module>
     <module>search-backend-indexer</module>
     <module>search-backend-remoterepository</module>
     <module>search-backend-smo</module>
@@ -55,13 +57,14 @@
     <!--
     Build time: latest Maven and LTS Java.
     -->
-    <requireBuildtimeMavenVersion.version>[3.9.4,)</requireBuildtimeMavenVersion.version>
-    <requireBuildtimeJavaVersion.version>[17.0.6,)</requireBuildtimeJavaVersion.version>
+    <requireBuildtimeMavenVersion.version>[3.9.12,)</requireBuildtimeMavenVersion.version>
+    <requireBuildtimeJavaVersion.version>[21,)</requireBuildtimeJavaVersion.version>
 
     <!--
-    Run time: Java 11+
+    Run time: Java 8+
     -->
-    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.release>8</maven.compiler.release>
+    <maven.compiler.testRelease>11</maven.compiler.testRelease>
 
     <!-- Dependency versions -->
     <version.mavenIndexer>7.1.6</version.mavenIndexer>
@@ -75,6 +78,16 @@
       <dependency>
         <groupId>eu.maveniverse.maven.mase</groupId>
         <artifactId>search-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.maveniverse.maven.mase</groupId>
+        <artifactId>search-transport-apache</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.maveniverse.maven.mase</groupId>
+        <artifactId>search-transport-java11</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -102,6 +115,11 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
+        <version>${version.slf4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
         <version>${version.slf4j}</version>
       </dependency>
 

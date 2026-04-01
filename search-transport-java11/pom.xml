@@ -26,19 +26,22 @@ under the License.
     <version>1.0.3-SNAPSHOT</version>
   </parent>
 
-  <artifactId>search-backend-remoterepository</artifactId>
+  <artifactId>search-transport-java11</artifactId>
 
   <name>${project.groupId}:${project.artifactId}</name>
-  <description>MASE Search Backend implemented by remote repository (limited).</description>
+  <description>MASE Search Transport JDK11.</description>
+
+  <properties>
+    <!--
+    Run time: Java 11+
+    -->
+    <maven.compiler.release>11</maven.compiler.release>
+  </properties>
 
   <dependencies>
     <dependency>
       <groupId>eu.maveniverse.maven.mase</groupId>
       <artifactId>search-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
     </dependency>
 
     <dependency>
@@ -46,30 +49,5 @@ under the License.
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>eu.maveniverse.maven.mase</groupId>
-      <artifactId>search-transport-java11</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>eu.maveniverse.maven.mase</groupId>
-      <artifactId>search-transport-apache</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
-
-  <build>
-    <resources>
-      <resource>
-        <filtering>true</filtering>
-        <directory>src/main/filtered-resources</directory>
-      </resource>
-    </resources>
-  </build>
-
 </project>

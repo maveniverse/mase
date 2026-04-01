@@ -46,6 +46,16 @@ under the License.
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>eu.maveniverse.maven.mase</groupId>
+      <artifactId>search-transport-java11</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>eu.maveniverse.maven.mase</groupId>
+      <artifactId>search-transport-apache</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

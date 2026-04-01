@@ -18,7 +18,8 @@
  */
 package org.apache.maven.search.backend.remoterepository;
 
-import org.apache.maven.search.api.transport.Java11HttpClientTransport;
+import static java.util.Objects.requireNonNull;
+
 import org.apache.maven.search.api.transport.Transport;
 import org.apache.maven.search.backend.remoterepository.extractor.MavenCentralResponseExtractor;
 import org.apache.maven.search.backend.remoterepository.extractor.Nx2ResponseExtractor;
@@ -43,25 +44,15 @@ public final class RemoteRepositorySearchBackendFactory {
     /**
      * Creates "default" RR search backend against Maven Central suitable for most use cases.
      */
-    public static RemoteRepositorySearchBackend createDefaultMavenCentral() {
-        return create(
-                BACKEND_ID,
-                CENTRAL_REPOSITORY_ID,
-                CENTRAL_URI,
-                new Java11HttpClientTransport(),
-                new MavenCentralResponseExtractor());
+    public static RemoteRepositorySearchBackend createDefaultMavenCentral(Transport transport) {
+        return create(BACKEND_ID, CENTRAL_REPOSITORY_ID, CENTRAL_URI, transport, new MavenCentralResponseExtractor());
     }
 
     /**
      * Creates "default" RR search backend against repository.apache.org releases repository suitable for most use cases.
      */
-    public static RemoteRepositorySearchBackend createDefaultRAOReleases() {
-        return create(
-                BACKEND_ID,
-                RAO_RELEASES_REPOSITORY_ID,
-                RAO_RELEASES_URI,
-                new Java11HttpClientTransport(),
-                new Nx2ResponseExtractor());
+    public static RemoteRepositorySearchBackend createDefaultRAOReleases(Transport transport) {
+        return create(BACKEND_ID, RAO_RELEASES_REPOSITORY_ID, RAO_RELEASES_URI, transport, new Nx2ResponseExtractor());
     }
 
     /**
@@ -73,6 +64,11 @@ public final class RemoteRepositorySearchBackendFactory {
             String baseUri,
             Transport transport,
             ResponseExtractor responseExtractor) {
+        requireNonNull(backendId);
+        requireNonNull(repositoryId);
+        requireNonNull(baseUri);
+        requireNonNull(transport);
+        requireNonNull(responseExtractor);
         return new RemoteRepositorySearchBackendImpl(backendId, repositoryId, baseUri, transport, responseExtractor);
     }
 }

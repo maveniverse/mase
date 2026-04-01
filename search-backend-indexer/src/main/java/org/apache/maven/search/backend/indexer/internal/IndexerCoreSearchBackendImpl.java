@@ -145,6 +145,11 @@ public class IndexerCoreSearchBackendImpl extends SearchBackendSupport implement
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        indexingContext.close(false);
+    }
+
     private Query toQuery(HashSet<Field> searchedFields, org.apache.maven.search.api.request.Query query) {
         if (query instanceof org.apache.maven.search.api.request.BooleanQuery.And) {
             org.apache.maven.search.api.request.BooleanQuery bq =

@@ -29,16 +29,25 @@ import java.util.Map;
  *
  * @since TBD
  */
-public interface Transport {
+public interface Transport extends Closeable {
     /**
      * Trivial response.
      */
     interface Response extends Closeable {
+        /**
+         * Returns the response code.
+         */
         int getCode();
 
+        /**
+         * Returns the response headers (with keys lower-cased).
+         */
         Map<String, String> getHeaders();
 
-        InputStream getBody();
+        /**
+         * Returns the response body as input stream.
+         */
+        InputStream getBody() throws IOException;
     }
 
     /**

@@ -44,9 +44,4 @@ public abstract class SearchBackendSupport implements SearchBackend {
     public String getRepositoryId() {
         return repositoryId;
     }
-
-    @Override
-    public void close() {
-        // override if needed
-    }
 }

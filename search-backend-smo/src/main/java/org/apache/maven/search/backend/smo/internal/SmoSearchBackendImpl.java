@@ -25,12 +25,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,23 +57,16 @@ public class SmoSearchBackendImpl extends SearchBackendSupport implements SmoSea
     protected static final Map<Field, String> FIELD_TRANSLATION;
 
     static {
-        FIELD_TRANSLATION = Map.of(
-                MAVEN.GROUP_ID,
-                "g",
-                MAVEN.ARTIFACT_ID,
-                "a",
-                MAVEN.VERSION,
-                "v",
-                MAVEN.CLASSIFIER,
-                "l",
-                MAVEN.PACKAGING,
-                "p",
-                MAVEN.CLASS_NAME,
-                "c",
-                MAVEN.FQ_CLASS_NAME,
-                "fc",
-                MAVEN.SHA1,
-                "1");
+        HashMap<Field, String> fieldTranslation = new HashMap<>();
+        fieldTranslation.put(MAVEN.GROUP_ID, "g");
+        fieldTranslation.put(MAVEN.ARTIFACT_ID, "a");
+        fieldTranslation.put(MAVEN.VERSION, "v");
+        fieldTranslation.put(MAVEN.CLASSIFIER, "l");
+        fieldTranslation.put(MAVEN.PACKAGING, "p");
+        fieldTranslation.put(MAVEN.CLASS_NAME, "c");
+        fieldTranslation.put(MAVEN.FQ_CLASS_NAME, "fc");
+        fieldTranslation.put(MAVEN.SHA1, "1");
+        FIELD_TRANSLATION = Collections.unmodifiableMap(fieldTranslation);
     }
 
     protected final String smoUri;
@@ -124,6 +121,11 @@ public class SmoSearchBackendImpl extends SearchBackendSupport implements SmoSea
         return new SmoSearchResponseImpl(searchRequest, totalHits, page, searchUri, payload);
     }
 
+    @Override
+    public void close() throws IOException {
+        transport.close();
+    }
+
     protected String toURI(SearchRequest searchRequest) {
         HashSet<Field> searchedFields = new HashSet<>();
         String smoQuery = toSMOQuery(searchedFields, searchRequest.getQuery());
@@ -164,11 +166,24 @@ public class SmoSearchBackendImpl extends SearchBackendSupport implements SmoSea
     protected String fetch(String serviceUri, Map<String, String> headers) throws IOException {
         try (Transport.Response response = transport.get(serviceUri, headers)) {
             if (response.getCode() == HttpURLConnection.HTTP_OK) {
-                return new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                copy(response.getBody(), bos);
+                return new String(bos.toByteArray(), StandardCharsets.UTF_8);
             } else {
                 throw new IOException("Unexpected response: " + response);
             }
         }
+    }
+
+    protected long copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+        byte[] buf = new byte[16384];
+        long result = 0L;
+        int read;
+        while ((read = inputStream.read(buf)) != -1) {
+            result += read;
+            outputStream.write(buf, 0, read);
+        }
+        return result;
     }
 
     protected String toSMOQuery(HashSet<Field> searchedFields, Query query) {
@@ -189,7 +204,12 @@ public class SmoSearchBackendImpl extends SearchBackendSupport implements SmoSea
     }
 
     protected String encodeQueryParameterValue(String parameterValue) {
-        return URLEncoder.encode(parameterValue, StandardCharsets.UTF_8).replace("+", "%20");
+        try {
+            return URLEncoder.encode(parameterValue, StandardCharsets.UTF_8.name())
+                    .replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e); // nvm
+        }
     }
 
     protected int populateFromRaw(JsonObject raw, List<Record> page) {

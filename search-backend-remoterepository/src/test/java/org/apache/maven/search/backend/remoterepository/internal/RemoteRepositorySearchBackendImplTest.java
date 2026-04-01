@@ -36,6 +36,8 @@ import org.apache.maven.search.api.SearchRequest;
 import org.apache.maven.search.api.request.BooleanQuery;
 import org.apache.maven.search.api.request.FieldQuery;
 import org.apache.maven.search.api.request.Query;
+import org.apache.maven.search.api.transport.apache.ApacheHttpClientTransport;
+import org.apache.maven.search.api.transport.java11.Java11HttpClientTransport;
 import org.apache.maven.search.backend.remoterepository.RemoteRepositorySearchBackend;
 import org.apache.maven.search.backend.remoterepository.RemoteRepositorySearchBackendFactory;
 import org.apache.maven.search.backend.remoterepository.RemoteRepositorySearchResponse;
@@ -50,8 +52,10 @@ public class RemoteRepositorySearchBackendImplTest {
 
     public static Collection<Object> data() {
         return Arrays.asList(
-                RemoteRepositorySearchBackendFactory.createDefaultMavenCentral(),
-                RemoteRepositorySearchBackendFactory.createDefaultRAOReleases());
+                RemoteRepositorySearchBackendFactory.createDefaultMavenCentral(new Java11HttpClientTransport()),
+                RemoteRepositorySearchBackendFactory.createDefaultRAOReleases(new Java11HttpClientTransport()),
+                RemoteRepositorySearchBackendFactory.createDefaultMavenCentral(new ApacheHttpClientTransport()),
+                RemoteRepositorySearchBackendFactory.createDefaultRAOReleases(new ApacheHttpClientTransport()));
     }
 
     private RemoteRepositorySearchBackend backend;

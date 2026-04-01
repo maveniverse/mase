@@ -16,15 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.search.backend.smo.internal;
+package org.apache.maven.search.api.transport;
 
-import org.apache.maven.search.api.transport.java11.Java11HttpClientTransport;
-import org.apache.maven.search.backend.smo.SmoSearchBackendFactory;
-import org.junit.jupiter.api.Disabled;
-
-@Disabled("This is not a test, is more a showcase")
-public class SmoSearchBackendImplTest extends SmoSearchBackendTestSupport {
-    public SmoSearchBackendImplTest() {
-        super(SmoSearchBackendFactory.createSmo(new Java11HttpClientTransport()));
-    }
+/**
+ * Factory for {@link Transport}.
+ */
+public interface TransportFactory {
+    /**
+     * Creates {@link Transport} instance.
+     */
+    Transport createTransport();
 }

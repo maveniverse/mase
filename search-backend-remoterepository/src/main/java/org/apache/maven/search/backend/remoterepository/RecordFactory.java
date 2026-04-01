@@ -61,7 +61,7 @@ public class RecordFactory {
         if (value == null) {
             return;
         }
-        if (value instanceof String && ((String) value).isBlank()) {
+        if (value instanceof String && ((String) value).trim().isEmpty()) {
             return;
         }
         result.put(fieldName, value);

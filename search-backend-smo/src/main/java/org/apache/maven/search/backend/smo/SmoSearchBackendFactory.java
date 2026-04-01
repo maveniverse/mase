@@ -18,7 +18,8 @@
  */
 package org.apache.maven.search.backend.smo;
 
-import org.apache.maven.search.api.transport.Java11HttpClientTransport;
+import static java.util.Objects.requireNonNull;
+
 import org.apache.maven.search.api.transport.Transport;
 import org.apache.maven.search.backend.smo.internal.SmoSearchBackendImpl;
 
@@ -61,31 +62,35 @@ public final class SmoSearchBackendFactory {
     /**
      * Creates "default" SMO search backend suitable for most use cases.
      *
-     * @deprecated Use methods {@link #createSmo()} or {@link #createCsc()} instead.
+     * @deprecated Use methods {@link #createSmo(Transport)} or {@link #createCsc(Transport)} instead.
      */
     @Deprecated
-    public static SmoSearchBackend createDefault() {
-        return create(DEFAULT_BACKEND_ID, DEFAULT_REPOSITORY_ID, DEFAULT_SMO_URI, new Java11HttpClientTransport());
+    public static SmoSearchBackend createDefault(Transport transport) {
+        return create(DEFAULT_BACKEND_ID, DEFAULT_REPOSITORY_ID, DEFAULT_SMO_URI, transport);
     }
 
     /**
      * Creates SMO backend.
      */
-    public static SmoSearchBackend createSmo() {
-        return create(SMO_BACKEND_ID, SMO_REPOSITORY_ID, SMO_SMO_URI, new Java11HttpClientTransport());
+    public static SmoSearchBackend createSmo(Transport transport) {
+        return create(SMO_BACKEND_ID, SMO_REPOSITORY_ID, SMO_SMO_URI, transport);
     }
 
     /**
      * Creates CSC backend.
      */
-    public static SmoSearchBackend createCsc() {
-        return create(CSC_BACKEND_ID, CSC_REPOSITORY_ID, CSC_SMO_URI, new Java11HttpClientTransport());
+    public static SmoSearchBackend createCsc(Transport transport) {
+        return create(CSC_BACKEND_ID, CSC_REPOSITORY_ID, CSC_SMO_URI, transport);
     }
 
     /**
      * Creates SMO search backend using provided parameters.
      */
     public static SmoSearchBackend create(String backendId, String repositoryId, String smoUri, Transport transport) {
+        requireNonNull(backendId);
+        requireNonNull(repositoryId);
+        requireNonNull(smoUri);
+        requireNonNull(transport);
         return new SmoSearchBackendImpl(backendId, repositoryId, smoUri, transport);
     }
 }

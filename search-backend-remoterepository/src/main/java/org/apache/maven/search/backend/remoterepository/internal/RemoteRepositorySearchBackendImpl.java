@@ -21,6 +21,7 @@ package org.apache.maven.search.backend.remoterepository.internal;
 import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,6 +30,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -84,10 +87,12 @@ public class RemoteRepositorySearchBackendImpl extends SearchBackendSupport impl
         this.transport = requireNonNull(transport);
         this.responseExtractor = requireNonNull(responseExtractor);
 
-        this.commonHeaders = Map.of(
+        Map<String, String> hdr = new HashMap<>();
+        hdr.put(
                 "User-Agent",
                 "Apache-Maven-Search-RR/" + discoverVersion() + " "
                         + transport.getClass().getSimpleName());
+        this.commonHeaders = Collections.unmodifiableMap(hdr);
     }
 
     protected String discoverVersion() {
@@ -156,7 +161,8 @@ public class RemoteRepositorySearchBackendImpl extends SearchBackendSupport impl
                 if (response.getCode() == 200) {
                     document = Jsoup.parse(response.getBody(), StandardCharsets.UTF_8.name(), uri, parser);
                 } else if (response.getCode() == 404) {
-                    document = Jsoup.parse(InputStream.nullInputStream(), StandardCharsets.UTF_8.name(), uri, parser);
+                    document = Jsoup.parse(
+                            new ByteArrayInputStream(new byte[0]), StandardCharsets.UTF_8.name(), uri, parser);
                 }
             }
 
@@ -211,6 +217,11 @@ public class RemoteRepositorySearchBackendImpl extends SearchBackendSupport impl
             }
         }
         return new RemoteRepositorySearchResponseImpl(searchRequest, totalHits, page, uri, document);
+    }
+
+    @Override
+    public void close() throws IOException {
+        transport.close();
     }
 
     protected static final DateTimeFormatter RFC7231 = DateTimeFormatter.ofPattern(

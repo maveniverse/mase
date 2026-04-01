@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.search.api.transport;
+package org.apache.maven.search.api.transport.java11;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -28,8 +29,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.AbstractMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.maven.search.api.transport.Transport;
 
 /**
  * Java 11 {@link HttpClient} backed transport.
@@ -55,7 +58,7 @@ public class Java11HttpClientTransport implements Transport {
         public Map<String, String> getHeaders() {
             return response.headers().map().entrySet().stream()
                     .map(e -> new AbstractMap.SimpleEntry<>(
-                            e.getKey(), e.getValue().get(0)))
+                            e.getKey().toLowerCase(Locale.ENGLISH), e.getValue().get(0)))
                     .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
         }
 
@@ -134,6 +137,13 @@ public class Java11HttpClientTransport implements Transport {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IOException(e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (client instanceof Closeable) {
+            ((Closeable) client).close();
         }
     }
 }

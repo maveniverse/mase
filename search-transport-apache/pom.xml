@@ -26,10 +26,10 @@ under the License.
     <version>1.0.3-SNAPSHOT</version>
   </parent>
 
-  <artifactId>search-backend-remoterepository</artifactId>
+  <artifactId>search-transport-apache</artifactId>
 
   <name>${project.groupId}:${project.artifactId}</name>
-  <description>MASE Search Backend implemented by remote repository (limited).</description>
+  <description>MASE Search Transport Apache HC4.</description>
 
   <dependencies>
     <dependency>
@@ -37,8 +37,41 @@ under the License.
       <artifactId>search-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.14</version>
+      <exclusions>
+        <exclusion>
+          <!-- using jcl-over-slf4j instead -->
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- httpclient uses old codec -->
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.4.16</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.21.0</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <scope>runtime</scope>
     </dependency>
 
     <dependency>
@@ -46,30 +79,5 @@ under the License.
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>eu.maveniverse.maven.mase</groupId>
-      <artifactId>search-transport-java11</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>eu.maveniverse.maven.mase</groupId>
-      <artifactId>search-transport-apache</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
-
-  <build>
-    <resources>
-      <resource>
-        <filtering>true</filtering>
-        <directory>src/main/filtered-resources</directory>
-      </resource>
-    </resources>
-  </build>
-
 </project>

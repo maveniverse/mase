@@ -18,12 +18,13 @@
  */
 package org.apache.maven.search.backend.smo.internal;
 
+import org.apache.maven.search.api.transport.java11.Java11HttpClientTransport;
 import org.apache.maven.search.backend.smo.SmoSearchBackendFactory;
 import org.junit.jupiter.api.Disabled;
 
 @Disabled("This is not a test, is more a showcase")
 public class CscSearchBackendImplTest extends SmoSearchBackendTestSupport {
     public CscSearchBackendImplTest() {
-        super(SmoSearchBackendFactory.createCsc());
+        super(SmoSearchBackendFactory.createCsc(new Java11HttpClientTransport()));
     }
 }
