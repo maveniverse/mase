@@ -27,6 +27,7 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -35,6 +36,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
 import org.apache.maven.search.api.transport.Transport;
 
 /**
@@ -79,7 +81,9 @@ public class ApacheHttpClientTransport implements Transport {
         }
     }
 
-    protected final Duration timeout;
+    protected final RequestConfig requestConfig;
+
+    protected final Supplier<HttpContext> contextSupplier;
 
     protected final CloseableHttpClient client;
 
@@ -88,11 +92,17 @@ public class ApacheHttpClientTransport implements Transport {
     }
 
     public ApacheHttpClientTransport(Duration timeout) {
-        this(timeout, HttpClientBuilder.create().build());
+        this(RequestConfig.custom()
+                .setRedirectsEnabled(false)
+                .setConnectionRequestTimeout((int) timeout.toMillis())
+                .setConnectTimeout((int) timeout.toMillis())
+                .setSocketTimeout((int) timeout.toMillis())
+                .build(), () -> null, HttpClientBuilder.create().build());
     }
 
-    public ApacheHttpClientTransport(Duration timeout, CloseableHttpClient client) {
-        this.timeout = requireNonNull(timeout);
+    public ApacheHttpClientTransport(RequestConfig requestConfig, Supplier<HttpContext> contextSupplier, CloseableHttpClient client) {
+        this.requestConfig = requireNonNull(requestConfig);
+        this.contextSupplier = requireNonNull(contextSupplier);
         this.client = requireNonNull(client);
     }
 
@@ -107,16 +117,11 @@ public class ApacheHttpClientTransport implements Transport {
     }
 
     protected Response execute(String serviceUri, Map<String, String> headers, HttpRequestBase req) throws IOException {
-        req.setConfig(RequestConfig.custom()
-                .setRedirectsEnabled(false)
-                .setConnectionRequestTimeout((int) timeout.toMillis())
-                .setConnectTimeout((int) timeout.toMillis())
-                .setSocketTimeout((int) timeout.toMillis())
-                .build());
+        req.setConfig(requestConfig);
         for (Map.Entry<String, String> header : headers.entrySet()) {
             req.addHeader(header.getKey(), header.getValue());
         }
-        return new ResponseImpl(serviceUri, client.execute(req));
+        return new ResponseImpl(serviceUri, client.execute(req, contextSupplier.get()));
     }
 
     @Override
