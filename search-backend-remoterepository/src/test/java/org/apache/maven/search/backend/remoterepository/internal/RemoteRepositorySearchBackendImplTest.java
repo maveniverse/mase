@@ -19,13 +19,15 @@
 package org.apache.maven.search.backend.remoterepository.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.maven.search.api.MAVEN;
@@ -35,18 +37,26 @@ import org.apache.maven.search.api.request.BooleanQuery;
 import org.apache.maven.search.api.request.FieldQuery;
 import org.apache.maven.search.api.request.Query;
 import org.apache.maven.search.backend.remoterepository.RemoteRepositorySearchBackend;
+import org.apache.maven.search.backend.remoterepository.RemoteRepositorySearchBackendFactory;
 import org.apache.maven.search.backend.remoterepository.RemoteRepositorySearchResponse;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * UT for 2 backends: Maven Central and RAO releases. This tests make use of the fact that RAO is used as "staging"
  * area for Maven Central, hence RAO releases contains everything that was staged and synced to Maven Central.
  */
-public abstract class RemoteRepositorySearchBackendImplTest {
+public class RemoteRepositorySearchBackendImplTest {
 
-    private final RemoteRepositorySearchBackend backend;
+    public static Collection<Object> data() {
+        return Arrays.asList(
+                RemoteRepositorySearchBackendFactory.createDefaultMavenCentral(),
+                RemoteRepositorySearchBackendFactory.createDefaultRAOReleases());
+    }
 
-    public RemoteRepositorySearchBackendImplTest(RemoteRepositorySearchBackend backend) {
+    private RemoteRepositorySearchBackend backend;
+
+    public void initRemoteRepositorySearchBackendImplTest(RemoteRepositorySearchBackend backend) {
         this.backend = backend;
     }
 
@@ -105,14 +115,22 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         System.out.println();
     }
 
-    @Test
-    public void smoke() {
-        SearchRequest searchRequest = new SearchRequest(Query.query("smoke"));
-        assertThrows(IllegalArgumentException.class, () -> backend.search(searchRequest));
+    @MethodSource("data")
+    @ParameterizedTest
+    public void smoke(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
+        assertThrows(IllegalArgumentException.class, () -> {
+            SearchRequest searchRequest = new SearchRequest(Query.query("smoke"));
+            RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
+            System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
+            dumpPage(searchResponse);
+        });
     }
 
-    @Test
-    public void notFound404Response() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void notFound404Response(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // LIST GAs
         SearchRequest searchRequest =
                 new SearchRequest(FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.cstamas.no-such-thing"));
@@ -121,44 +139,52 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
     }
 
-    @Test
-    public void g() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void g(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // LIST GAs
         SearchRequest searchRequest =
                 new SearchRequest(FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"));
         RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
-        assertNotEquals(0, searchResponse.getTotalHits());
+        assertTrue(searchResponse.getTotalHits() > 0);
         System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void ga() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void ga(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // LIST GAVs
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"),
                 FieldQuery.fieldQuery(MAVEN.ARTIFACT_ID, "maven-clean-plugin")));
         RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
-        assertNotEquals(0, searchResponse.getTotalHits());
+        assertTrue(searchResponse.getTotalHits() > 0);
         System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gav() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gav(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // LIST GAVCEs
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"),
                 FieldQuery.fieldQuery(MAVEN.ARTIFACT_ID, "maven-clean-plugin"),
                 FieldQuery.fieldQuery(MAVEN.VERSION, "3.1.0")));
         RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
-        assertNotEquals(0, searchResponse.getTotalHits());
+        assertEquals(5, searchResponse.getTotalHits());
         System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gave() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gave(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // LIST GAVCEs
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"),
@@ -172,8 +198,10 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gavWithTarGz() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gavWithTarGz(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // LIST GAVCEs
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven"),
@@ -185,8 +213,10 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gavce() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gavce(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // EXISTENCE check: total hits != 0 => exists, total hits == 0 => not exists
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"),
@@ -199,8 +229,10 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gavcesha1RightChecksum() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gavcesha1RightChecksum(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // validity check: total hits != 0 => valid, total hits == 0 => invalid
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"),
@@ -214,8 +246,10 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gavcesha1WrongChecksum() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gavcesha1WrongChecksum(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // validity check: total hits != 0 => valid, total hits == 0 => invalid
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven.plugins"),
@@ -229,8 +263,10 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gavcesha1WClassifierRightChecksum() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gavcesha1WClassifierRightChecksum(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // validity check: total hits != 0 => valid, total hits == 0 => invalid
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven"),
@@ -245,8 +281,10 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void gavcesha1WClassifierWrongChecksum() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void gavcesha1WClassifierWrongChecksum(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
         // validity check: total hits != 0 => valid, total hits == 0 => invalid
         SearchRequest searchRequest = new SearchRequest(BooleanQuery.and(
                 FieldQuery.fieldQuery(MAVEN.GROUP_ID, "org.apache.maven"),
@@ -261,24 +299,42 @@ public abstract class RemoteRepositorySearchBackendImplTest {
         dumpPage(searchResponse);
     }
 
-    @Test
-    public void sha1() {
-        SearchRequest searchRequest =
-                new SearchRequest(FieldQuery.fieldQuery(MAVEN.SHA1, "8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12"));
-        assertThrows(IllegalArgumentException.class, () -> backend.search(searchRequest));
+    @MethodSource("data")
+    @ParameterizedTest
+    public void sha1(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
+        assertThrows(IllegalArgumentException.class, () -> {
+            SearchRequest searchRequest =
+                    new SearchRequest(FieldQuery.fieldQuery(MAVEN.SHA1, "8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12"));
+            RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
+            System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
+            dumpPage(searchResponse);
+        });
     }
 
-    @Test
-    public void cn() {
-        SearchRequest searchRequest =
-                new SearchRequest(FieldQuery.fieldQuery(MAVEN.CLASS_NAME, "MavenRepositorySystem"));
-        assertThrows(IllegalArgumentException.class, () -> backend.search(searchRequest));
+    @MethodSource("data")
+    @ParameterizedTest
+    public void cn(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
+        assertThrows(IllegalArgumentException.class, () -> {
+            SearchRequest searchRequest =
+                    new SearchRequest(FieldQuery.fieldQuery(MAVEN.CLASS_NAME, "MavenRepositorySystem"));
+            RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
+            System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
+            dumpPage(searchResponse);
+        });
     }
 
-    @Test
-    public void fqcn() {
-        SearchRequest searchRequest = new SearchRequest(
-                FieldQuery.fieldQuery(MAVEN.FQ_CLASS_NAME, "org.apache.maven.bridge.MavenRepositorySystem"));
-        assertThrows(IllegalArgumentException.class, () -> backend.search(searchRequest));
+    @MethodSource("data")
+    @ParameterizedTest
+    public void fqcn(RemoteRepositorySearchBackend backend) throws IOException {
+        initRemoteRepositorySearchBackendImplTest(backend);
+        assertThrows(IllegalArgumentException.class, () -> {
+            SearchRequest searchRequest = new SearchRequest(
+                    FieldQuery.fieldQuery(MAVEN.FQ_CLASS_NAME, "org.apache.maven.bridge.MavenRepositorySystem"));
+            RemoteRepositorySearchResponse searchResponse = backend.search(searchRequest);
+            System.out.println("TOTAL HITS: " + searchResponse.getTotalHits());
+            dumpPage(searchResponse);
+        });
     }
 }

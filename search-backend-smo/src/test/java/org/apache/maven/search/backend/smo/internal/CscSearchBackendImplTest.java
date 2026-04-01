@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.search.backend.remoterepository.internal;
+package org.apache.maven.search.backend.smo.internal;
 
-import org.apache.maven.search.backend.remoterepository.RemoteRepositorySearchBackendFactory;
+import org.apache.maven.search.backend.smo.SmoSearchBackendFactory;
+import org.junit.jupiter.api.Disabled;
 
-public class CentralRemoteRepositorySearchBackendImplTest extends RemoteRepositorySearchBackendImplTest {
-    public CentralRemoteRepositorySearchBackendImplTest() {
-        super(RemoteRepositorySearchBackendFactory.createDefaultMavenCentral());
+@Disabled("This is not a test, is more a showcase")
+public class CscSearchBackendImplTest extends SmoSearchBackendTestSupport {
+    public CscSearchBackendImplTest() {
+        super(SmoSearchBackendFactory.createCsc());
     }
 }

@@ -26,10 +26,10 @@ import org.apache.maven.search.api.request.Query;
 /**
  * A search request to perform search: defines paging and query.
  */
-public final class SearchRequest {
-    private final Paging paging;
+public class SearchRequest {
+    protected final Paging paging;
 
-    private final Query query;
+    protected final Query query;
 
     /**
      * Creates a request with given {@link Query} instance and default page size of 50.

@@ -29,11 +29,11 @@ import org.apache.maven.search.api.SearchResponse;
  * A search response support class.
  */
 public abstract class SearchResponseSupport implements SearchResponse {
-    private final SearchRequest searchRequest;
+    protected final SearchRequest searchRequest;
 
-    private final int totalHits;
+    protected final int totalHits;
 
-    private final List<Record> page;
+    protected final List<Record> page;
 
     protected SearchResponseSupport(SearchRequest searchRequest, int totalHits, List<Record> page) {
         this.searchRequest = requireNonNull(searchRequest);
