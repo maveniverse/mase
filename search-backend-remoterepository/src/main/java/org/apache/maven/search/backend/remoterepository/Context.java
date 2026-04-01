@@ -32,10 +32,10 @@ import org.apache.maven.search.api.request.Query;
 /**
  * Class that "disassembles" the query and populates fields and values and exposes them.
  */
-public final class Context {
-    private final SearchRequest searchRequest;
+public class Context {
+    protected final SearchRequest searchRequest;
 
-    private final Map<Field, String> fields;
+    protected final Map<Field, String> fields;
 
     public Context(SearchRequest searchRequest) {
         this.searchRequest = requireNonNull(searchRequest);
@@ -43,7 +43,7 @@ public final class Context {
         populateFields(searchRequest.getQuery());
     }
 
-    private void populateFields(Query query) {
+    protected void populateFields(Query query) {
         if (query instanceof BooleanQuery) {
             populateFields(((BooleanQuery) query).getLeft());
             populateFields(((BooleanQuery) query).getRight());

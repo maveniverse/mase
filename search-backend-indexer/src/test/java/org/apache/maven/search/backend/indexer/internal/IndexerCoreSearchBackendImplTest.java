@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.maven.search.api.request.BooleanQuery.and;
 import static org.apache.maven.search.api.request.Query.query;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -30,6 +30,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled("This is more a showcase than test; runs way too long")
+@Disabled("This is not a test, is more a showcase")
 public class IndexerCoreSearchBackendImplTest extends InjectedTest {
     @Inject
     private Indexer indexer;
@@ -129,8 +130,8 @@ public class IndexerCoreSearchBackendImplTest extends InjectedTest {
     @BeforeEach
     public void prepareAndUpdateBackend() throws Exception {
         // Files where local cache is (if any) and Lucene Index should be located
-        File centralLocalCache = new File("target/central-cache");
-        File centralIndexDir = new File("target/central-index");
+        Path centralLocalCache = Path.of("target/central-cache");
+        Path centralIndexDir = Path.of("target/central-index");
 
         // Creators we want to use (search for fields it defines)
         List<IndexCreator> indexers = new ArrayList<>();
@@ -142,8 +143,8 @@ public class IndexerCoreSearchBackendImplTest extends InjectedTest {
         centralContext = indexer.createIndexingContext(
                 "central-context",
                 "central",
-                centralLocalCache,
-                centralIndexDir,
+                centralLocalCache.toFile(),
+                centralIndexDir.toFile(),
                 "https://repo1.maven.org/maven2",
                 null,
                 true,
@@ -161,7 +162,7 @@ public class IndexerCoreSearchBackendImplTest extends InjectedTest {
 
         Date centralContextCurrentTimestamp = centralContext.getTimestamp();
         IndexUpdateRequest updateRequest = new IndexUpdateRequest(centralContext, new Java11HttpClient());
-        updateRequest.setLocalIndexCacheDir(centralLocalCache);
+        updateRequest.setLocalIndexCacheDir(centralLocalCache.toFile());
         updateRequest.setThreads(4);
         IndexUpdateResult updateResult = indexUpdater.fetchAndUpdateIndex(updateRequest);
         if (updateResult.isFullUpdate()) {
@@ -256,15 +257,15 @@ public class IndexerCoreSearchBackendImplTest extends InjectedTest {
         private URI uri;
 
         @Override
-        public void connect(String id, String url) {
+        public void connect(String id, String url) throws IOException {
             this.uri = URI.create(url + "/");
         }
 
         @Override
-        public void disconnect() {}
+        public void disconnect() throws IOException {}
 
         @Override
-        public InputStream retrieve(String name) throws IOException {
+        public InputStream retrieve(String name) throws IOException, FileNotFoundException {
             HttpRequest request =
                     HttpRequest.newBuilder().uri(uri.resolve(name)).GET().build();
             try {

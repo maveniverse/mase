@@ -28,9 +28,9 @@ import java.util.Objects;
  * Field, that is used as key in record.
  */
 public abstract class Field {
-    private final String fieldName;
+    protected final String fieldName;
 
-    private Field(String fieldName) {
+    protected Field(String fieldName) {
         this.fieldName = requireNonNull(fieldName);
     }
 

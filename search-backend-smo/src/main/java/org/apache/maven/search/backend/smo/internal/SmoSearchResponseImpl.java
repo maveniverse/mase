@@ -27,9 +27,9 @@ import org.apache.maven.search.api.support.SearchResponseSupport;
 import org.apache.maven.search.backend.smo.SmoSearchResponse;
 
 public class SmoSearchResponseImpl extends SearchResponseSupport implements SmoSearchResponse {
-    private final String searchUri;
+    protected final String searchUri;
 
-    private final String rawJsonResponse;
+    protected final String rawJsonResponse;
 
     public SmoSearchResponseImpl(
             SearchRequest searchRequest, int totalHits, List<Record> page, String searchUri, String rawJsonResponse) {
