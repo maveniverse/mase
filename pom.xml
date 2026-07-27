@@ -68,7 +68,7 @@
 
     <!-- Dependency versions -->
     <version.mavenIndexer>7.1.6</version.mavenIndexer>
-    <version.sisu>1.0.0</version.sisu>
+    <version.sisu>1.1.0</version.sisu>
     <version.slf4j>2.0.18</version.slf4j>
   </properties>
 
