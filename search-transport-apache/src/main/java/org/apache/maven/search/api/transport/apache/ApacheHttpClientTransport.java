@@ -20,6 +20,7 @@ package org.apache.maven.search.api.transport.apache;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -29,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -62,12 +64,16 @@ public class ApacheHttpClientTransport implements Transport {
         public Map<String, String> getHeaders() {
             return Arrays.stream(response.getAllHeaders())
                     .map(e -> new AbstractMap.SimpleEntry<>(e.getName().toLowerCase(Locale.ENGLISH), e.getValue()))
-                    .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                    // repeated headers are legal in HTTP; keep the first value, like the Java 11 transport
+                    .collect(Collectors.toMap(
+                            AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue, (a, b) -> a));
         }
 
         @Override
         public InputStream getBody() throws IOException {
-            return response.getEntity().getContent();
+            // no entity on HEAD, 204, 304
+            HttpEntity entity = response.getEntity();
+            return entity == null ? new ByteArrayInputStream(new byte[0]) : entity.getContent();
         }
 
         @Override

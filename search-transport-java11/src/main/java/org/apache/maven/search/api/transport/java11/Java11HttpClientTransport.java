@@ -20,7 +20,6 @@ package org.apache.maven.search.api.transport.java11;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -142,8 +141,15 @@ public class Java11HttpClientTransport implements Transport {
 
     @Override
     public void close() throws IOException {
-        if (client instanceof Closeable) {
-            ((Closeable) client).close();
+        // HttpClient is AutoCloseable (not Closeable) since Java 21
+        if (client instanceof AutoCloseable) {
+            try {
+                ((AutoCloseable) client).close();
+            } catch (IOException | RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
         }
     }
 }
